@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Email Spam Detector{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ user.username }}!</p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('email_controller.detect') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Detection
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total Detections</h6>
+                        <h2 class="mb-0">{{ stats.total }}</h2>
+                    </div>
+                    <i class="fas fa-envelope fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Spam Detected</h6>
+                        <h2 class="mb-0">{{ stats.spam }}</h2>
+                    </div>
+                    <i class="fas fa-exclamation-triangle fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Legitimate</h6>
+                        <h2 class="mb-0">{{ stats.ham }}</h2>
+                    </div>
+                    <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Detections</h5>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Prediction</th>
+                                    <th>Confidence</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in history %}
+                                <tr>
+                                    <td>{{ item.subject or 'No subject' }}</td>
+                                    <td>
+                                        {% if item.prediction == 'spam' %}
+                                            <span class="badge bg-danger">Spam</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Legitimate</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {% if item.prediction == 'spam' %}bg-danger{% else %}bg-success{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ item.confidence }}%;"
+                                                 aria-valuenow="{{ item.confidence }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ item.confidence }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.processed_at[:10] }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="viewDetails({{ item.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-4">No detection history yet.</p>
+                    <div class="text-center">
+                        <a href="{{ url_for('email_controller.detect') }}" class="btn btn-primary">
+                            Start Your First Detection
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statsChart" width="400" height="300"></canvas>
+                <hr>
+                <div class="text-center">
+                    <p class="mb-1">Spam Rate</p>
+                    <h3>{{ stats.spam_percentage }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Stats Chart
+const ctx = document.getElementById('statsChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Spam ({{ stats.spam }})', 'Legitimate ({{ stats.ham }})'],
+        datasets: [{
+            data: [{{ stats.spam }}, {{ stats.ham }}],
+            backgroundColor: ['#dc3545', '#28a745'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+function viewDetails(id) {
+    // Implement view details functionality
+    alert('View details for detection #' + id);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Email Spam Detector{% endblock %}
+
+{% block content %}
+<div class="row align-items-center min-vh-75">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">
+            Protect Your Inbox from 
+            <span class="text-primary">Spam & Phishing</span>
+        </h1>
+        <p class="lead mb-4">
+            Enterprise-grade email spam and phishing detection powered by advanced 
+            Natural Language Processing and Machine Learning algorithms.
+        </p>
+        
+        {% if not current_user.is_authenticated %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('auth_controller.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                    <i class="fas fa-user-plus"></i> Get Started
+                </a>
+                <a href="{{ url_for('auth_controller.login') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('email_controller.dashboard') }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+                <a href="{{ url_for('email_controller.detect') }}" class="btn btn-success btn-lg px-4">
+                    <i class="fas fa-search"></i> Detect Email
+                </a>
+            </div>
+        {% endif %}
+        
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-robot fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-0">AI-Powered</h6>
+                        <small class="text-muted">ML Classification</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-bolt fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-0">Real-time</h6>
+                        <small class="text-muted">Instant Detection</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-lock fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-0">Enterprise</h6>
+                        <small class="text-muted">Security Ready</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h3 class="card-title text-center mb-4">Try It Now</h3>
+                <form id="quickDetectForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email Subject</label>
+                        <input type="text" class="form-control" id="quickSubject" 
+                               placeholder="Enter email subject">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email Body</label>
+                        <textarea class="form-control" id="quickBody" rows="4" 
+                                  placeholder="Paste email content here..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" onclick="quickDetect()">
+                        <i class="fas fa-search"></i> Check Email
+                    </button>
+                </form>
+                <div id="quickResult" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 pt-5">
+    <div class="col-12 text-center">
+        <h2 class="fw-bold mb-4">How It Works</h2>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
+                    <i class="fas fa-envelope fa-3x text-primary"></i>
+                </div>
+                <h5>1. Input Email</h5>
+                <p class="text-muted">Submit the email content you want to analyze through our secure interface</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
+                    <i class="fas fa-brain fa-3x text-primary"></i>
+                </div>
+                <h5>2. AI Analysis</h5>
+                <p class="text-muted">Our ML model analyzes the email using NLP and pattern recognition</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
+                    <i class="fas fa-check-circle fa-3x text-primary"></i>
+                </div>
+                <h5>3. Get Results</h5>
+                <p class="text-muted">Receive instant classification with confidence score</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function quickDetect() {
+    const subject = document.getElementById('quickSubject').value;
+    const body = document.getElementById('quickBody').value;
+    
+    if (!body) {
+        alert('Please enter email body');
+        return;
+    }
+    
+    fetch('/api/classify', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            subject: subject,
+            body: body
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resultDiv = document.getElementById('quickResult');
+        let resultClass = data.is_spam ? 'danger' : 'success';
+        let resultIcon = data.is_spam ? 'fa-exclamation-triangle' : 'fa-check-circle';
+        let resultText = data.is_spam ? '⚠️ SPAM DETECTED' : '✅ LEGITIMATE EMAIL';
+        
+        resultDiv.innerHTML = `
+            <div class="alert alert-${resultClass}">
+                <i class="fas ${resultIcon} me-2"></i>
+                <strong>${resultText}</strong><br>
+                <small>Confidence: ${data.confidence}%</small>
+            </div>
+        `;
+        resultDiv.style.display = 'block';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

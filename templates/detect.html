@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Detect Email - Email Spam Detector{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-search"></i> Email Spam Detection</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('email_controller.detect') }}">
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Email Subject</label>
+                        <input type="text" class="form-control" id="subject" name="subject" 
+                               placeholder="Enter email subject (optional)">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="body" class="form-label">Email Body</label>
+                        <textarea class="form-control" id="body" name="body" rows="8" 
+                                  placeholder="Paste the email content here..." required></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shield-alt"></i> Analyze Email
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadSample()">
+                            <i class="fas fa-flask"></i> Load Sample
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Include the complete email content for accurate detection</li>
+                    <li>Our system analyzes both subject and body text</li>
+                    <li>Results include confidence score to indicate reliability</li>
+                    <li>All detections are saved to your history for future reference</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadSample() {
+    const samples = [
+        {
+            subject: "Congratulations! You've Won!",
+            body: "Dear Customer,\n\nCongratulations! You have been selected as the winner of our grand prize draw. You've won $1,000,000!\n\nTo claim your prize, please click the link below and provide your personal information:\n\nhttp://fake-link.com/claim\n\nThis offer expires in 24 hours.\n\nBest regards,\nPrize Team"
+        },
+        {
+            subject: "Project Update - Q4 Report",
+            body: "Hi Team,\n\nI've attached the Q4 report for your review. Please take a look and provide feedback by Friday.\n\nWe need to discuss the budget allocation for next year in our upcoming meeting.\n\nBest regards,\nJohn\n\nProject Manager"
+        }
+    ];
+    
+    const randomSample = samples[Math.floor(Math.random() * samples.length)];
+    document.getElementById('subject').value = randomSample.subject;
+    document.getElementById('body').value = randomSample.body;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Detection Result - Email Spam Detector{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header {% if result.is_spam %}bg-danger{% else %}bg-success{% endif %} text-white">
+                <h4 class="mb-0">
+                    <i class="fas {% if result.is_spam %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
+                    Detection Result
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <!-- Result Icon -->
+                <div class="mb-4">
+                    <div class="rounded-circle d-inline-flex p-4 {% if result.is_spam %}bg-danger bg-opacity-10{% else %}bg-success bg-opacity-10{% endif %}">
+                        <i class="fas {% if result.is_spam %}fa-exclamation-triangle fa-4x text-danger{% else %}fa-check-circle fa-4x text-success{% endif %}"></i>
+                    </div>
+                </div>
+                
+                <!-- Result Text -->
+                <h2 class="mb-3 {% if result.is_spam %}text-danger{% else %}text-success{% endif %}">
+                    {% if result.is_spam %}
+                        ⚠️ SPAM DETECTED
+                    {% else %}
+                        ✅ LEGITIMATE EMAIL
+                    {% endif %}
+                </h2>
+                
+                <!-- Confidence Score -->
+                <div class="mb-4">
+                    <h5>Confidence Score</h5>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar {% if result.is_spam %}bg-danger{% else %}bg-success{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ result.confidence }}%;"
+                             aria-valuenow="{{ result.confidence }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ result.confidence }}%
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Info -->
+                <div class="alert alert-secondary text-start">
+                    <p class="mb-2"><strong>Classification:</strong> {{ result.prediction|upper }}</p>
+                    <p class="mb-2"><strong>Processed:</strong> {{ result.processed_at }}</p>
+                    <p class="mb-0"><strong>Recommendation:</strong> 
+                        {% if result.is_spam %}
+                            This email appears to be spam or phishing. Do not click any links or provide personal information.
+                        {% else %}
+                            This email appears legitimate, but always exercise caution with unexpected attachments or links.
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="{{ url_for('email_controller.detect') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> New Detection
+                    </a>
+                    <a href="{{ url_for('email_controller.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+text,label
+"Congratulations! You've won a free iPhone. Click here to claim your prize now!",spam
+"URGENT: Your account has been compromised. Verify your details immediately.",spam
+"Make $5000 per week working from home! Limited time offer.",spam
+"You have been selected for a free vacation to Bahamas. Call now!",spam
+"Dear customer, your PayPal account needs verification. Click the link below.",spam
+"Hi team, please find attached the quarterly report for review.",ham
+"Can we schedule a meeting for tomorrow at 2 PM to discuss the project?",ham
+"Your order #12345 has been shipped and will arrive in 3-5 business days.",ham
+"Thank you for subscribing to our newsletter. You'll receive weekly updates.",ham
+"Meeting minutes from today's standup: John will work on the frontend.",ham

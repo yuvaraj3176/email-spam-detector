@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Detection History - Email Spam Detector{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="fas fa-history"></i> Detection History</h2>
+        <p class="text-muted">View all your past email classifications</p>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        {% if logs.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Subject</th>
+                            <th>Body Preview</th>
+                            <th>Prediction</th>
+                            <th>Confidence</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs.items %}
+                        <tr>
+                            <td>#{{ log.id }}</td>
+                            <td>{{ log.email_subject or 'No subject' }}</td>
+                            <td>{{ log.email_body[:50] }}...</td>
+                            <td>
+                                {% if log.prediction == 'spam' %}
+                                    <span class="badge bg-danger">Spam</span>
+                                {% else %}
+                                    <span class="badge bg-success">Legitimate</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if log.prediction == 'spam' %}bg-danger{% else %}bg-success{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ log.confidence }}%;"
+                                         aria-valuenow="{{ log.confidence }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ log.confidence }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ log.processed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="viewDetails({{ log.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if logs.pages > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if logs.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('email_controller.history', page=logs.prev_num) }}">
+                            Previous
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in logs.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == logs.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('email_controller.history', page=page_num) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if logs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('email_controller.history', page=logs.next_num) }}">
+                            Next
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+        {% else %}
+            <p class="text-muted text-center my-5">No detection history yet.</p>
+            <div class="text-center">
+                <a href="{{ url_for('email_controller.detect') }}" class="btn btn-primary">
+                    Start Your First Detection
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewDetails(id) {
+    // Implement view details modal or page
+    alert('View details for detection #' + id);
+}
+</script>
+{% endblock %}
